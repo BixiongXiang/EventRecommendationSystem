@@ -2,6 +2,7 @@ package rpc;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -11,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import db.DBConnection;
 import db.DBConnectionFactory;
@@ -41,15 +43,15 @@ public class SearchItem extends HttpServlet {
 		
 		//check login before login
 		// allow access only if login session exists
-//		HttpSession session = request.getSession(false);
-//		if (session == null) {
-//			response.setStatus(403);
-//			return;
-//		}
+		HttpSession session = request.getSession(false);
+		if (session == null) {
+			response.setStatus(403);
+			return;
+		}
 		
 		
 		// optional
-//		String userId = session.getAttribute("user_id").toString();
+		String userId = session.getAttribute("user_id").toString();
 		
 		// get search parameters. Term can be empty or null. this is the search key word
 		String term = request.getParameter("term");
@@ -62,10 +64,14 @@ public class SearchItem extends HttpServlet {
 		//try to get data from tmAPI and store it in DB
 		try {
 			List<Item> items = connection.searchItems(lat, lon, term);
-
+			Set<String> favoritedItemIds = connection.getFavoriteItemIds(userId);
+			
 			JSONArray array = new JSONArray();
 			for (Item item : items) {
-				array.put(item.toJSONObject());
+				JSONObject obj = item.toJSONObject();
+				// to tell front end if it is favorated, check fav item id contains itemid, add field favorate and set it to true ot false
+				obj.put("favorite", favoritedItemIds.contains(item.getItemId()));
+				array.put(obj);
 			}
 			//after we get data from tmAPI write it into response,
 			RpcHelper.writeJsonArray(response, array);

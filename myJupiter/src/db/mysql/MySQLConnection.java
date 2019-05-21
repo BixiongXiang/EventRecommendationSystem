@@ -77,7 +77,7 @@ public class MySQLConnection implements DBConnection {
 
 		try {
 			// fav time is selectable, here we dont use
-			String sql = "DELETE FROM history WHERE user_id - ? AND item_id = ?";
+			String sql = "DELETE FROM history WHERE user_id = ? AND item_id = ?";
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setString(1, userId);
 			ps.setString(2, itemId);
@@ -285,7 +285,7 @@ public class MySQLConnection implements DBConnection {
 			ps.setString(2, password); 	// just to find if there is a maching user, we don't verify at here, let db varify
 			
 			ResultSet rs = ps.executeQuery();
-			if (rs.next()) {
+			if (rs.next()) { // if have result, varify succeed
 				return true;
 			}
 			
@@ -294,5 +294,40 @@ public class MySQLConnection implements DBConnection {
 		}
 		return false;
 	}
+	
+	@Override
+	public boolean registerUser(String userId, String password, String firstname, String lastname) {
+		// TODO Auto-generated method stub
+		if (conn == null) {
+			System.err.println("DB connection failed");
+			return false;
+		}
+		
+		try {
+			String sql = "INSERT IGNORE INTO users VALUES (?, ?, ?, ?)";
+			
+			PreparedStatement ps = conn.prepareStatement(sql);
+			
+			ps.setString(1, userId);
+			ps.setString(2, password);
+			ps.setString(3, firstname);
+			ps.setString(4, lastname);
+			
+			// here is the return of the database, indicate how many rows are been modified, if success, should return 1.
+			return ps.executeUpdate() == 1;
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		return false;
+	}
+	
+	@Override
+	public boolean isConnected() {
+		// TODO Auto-generated method stub
+		return conn != null;
+	}
+
+
 
 }

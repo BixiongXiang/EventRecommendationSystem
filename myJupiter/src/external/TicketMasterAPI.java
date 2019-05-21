@@ -45,7 +45,7 @@ public class TicketMasterAPI {
 		}
 
 		// "apikey=qqPuP6n3ivMUoT9fPgLepkRMreBcbrjV&latlong=37,-120&keyword=event&radius=50"
-		String query = String.format("apikey=%s&latlong=%s,%s&keyword=%s&radius=%s", API_KEY, lat, lon, keyword, 50);
+		String query = String.format("apikey=%s&latlong=%s,%s&keyword=%s&radius=%s", API_KEY, lat, lon, keyword, 100);
 		String url = URL + "?" + query;
 
 		try {
@@ -185,8 +185,17 @@ public class TicketMasterAPI {
 //Convert JSONArray to a list of item objects.
 	private List<Item> getItemList(JSONArray events) throws JSONException {
 		List<Item> itemList = new ArrayList<>();
+		Set<String> visited = new HashSet<String>(); // dedup
+		
 		for (int i = 0; i < events.length(); ++i) {
 			JSONObject event = events.getJSONObject(i);
+			
+			//event with same name may hold on multple days, so get only one of the event
+			if (visited.contains(event.getString("name"))) {
+				continue;
+			} else {
+				visited.add(event.getString("name"));
+			}
 			
 			ItemBuilder builder = new ItemBuilder();
 			if (!event.isNull("id")) {

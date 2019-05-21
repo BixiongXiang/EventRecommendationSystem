@@ -1,4 +1,5 @@
-/* main0.js
+/* this is a fake js for testing without server
+ * main0.js
  * inorder to load items after page is loaded  and provide the basic functions
  * 
  * */
